@@ -9,10 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    env:
+      # Kényszerítjük a Node.js 24 használatát a figyelmeztetés eltüntetéséhez
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4  # Frissítve v2 -> v4
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -21,11 +24,15 @@ jobs:
       with:
         release: '9-2020-q2'
 
+    # EZ A JAVÍTÁS: Manuálisan hozzáadjuk a GCC-t az elérési úthoz az új módszerrel
+    - name: Fix GCC Path
+      run: echo "/home/runner/.arm-none-eabi-gcc/bin" >> $GITHUB_PATH
+
     - name: Build project
       run: make
       
     - name: Set up Python
-      uses: actions/setup-python@v5  # Frissítve v2 -> v5
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
         architecture: 'x64'
@@ -34,7 +41,7 @@ jobs:
       run: python tools/xiaotea/Scripts/prepareZip_online.py      
       
     - name: 'Upload Artifact'
-      uses: actions/upload-artifact@v4  # Ez volt a kritikus hiba (v2 -> v4)
+      uses: actions/upload-artifact@v4
       with:
         path: ${{ github.workspace }}/tools/zip_output
         name: M365_v3_build_${{ github.run_number }}
