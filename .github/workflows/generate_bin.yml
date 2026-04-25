@@ -10,7 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Kényszerítjük a Node.js 24 használatát a figyelmeztetés eltüntetéséhez
+      # Ez engedélyezi a régi 'add-path' parancsot, amit a fordító igényel
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      # Ez pedig kezeli a Node.js verzióváltást
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
@@ -23,10 +25,6 @@ jobs:
       uses: fiam/arm-none-eabi-gcc@v1.0.2
       with:
         release: '9-2020-q2'
-
-    # EZ A JAVÍTÁS: Manuálisan hozzáadjuk a GCC-t az elérési úthoz az új módszerrel
-    - name: Fix GCC Path
-      run: echo "/home/runner/.arm-none-eabi-gcc/bin" >> $GITHUB_PATH
 
     - name: Build project
       run: make
