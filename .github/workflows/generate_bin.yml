@@ -9,11 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Ez engedélyezi a régi 'add-path' parancsot, amit a fordító igényel
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      # Ez pedig kezeli a Node.js verzióváltást
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout repository
@@ -21,14 +16,16 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Set up arm-none-eabi-gcc
-      uses: fiam/arm-none-eabi-gcc@v1.0.2
-      with:
-        release: '9-2020-q2'
+    # Hivatalos ARM GCC 9-2020-q2 letöltése és PATH-hoz adása (Node-független)
+    - name: Set up arm-none-eabi-gcc (9-2020-q2)
+      run: |
+        wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2
+        tar -xjf gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2
+        echo "$GITHUB_WORKSPACE/gcc-arm-none-eabi-9-2020-q2-update/bin" >> $GITHUB_PATH
 
     - name: Build project
       run: make
-      
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -36,9 +33,9 @@ jobs:
         architecture: 'x64'
 
     - name: Prepare ZIP
-      run: python tools/xiaotea/Scripts/prepareZip_online.py      
-      
-    - name: 'Upload Artifact'
+      run: python tools/xiaotea/Scripts/prepareZip_online.py
+
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         path: ${{ github.workspace }}/tools/zip_output
